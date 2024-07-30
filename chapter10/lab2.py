@@ -33,38 +33,23 @@ from ISLP.torch.imdb import (load_lookup ,load_tensor , load_sparse ,load_sequen
 
 from glob import glob
 import json
+import matplotlib.pyplot as plt
 
-Hitters = load_data('Hitters').dropna()
-n = Hitters.shape[0]
+hit_logger = CSVLogger('logs', name='hitters')
+#print(hit_logger.experiment.metrics_file_path)
+hit_results = pd.read_csv('logs/hitters/version_4/metrics.csv')
 
-model = MS(Hitters.columns.drop('Salary'), intercept=False)
-X = model.fit_transform(Hitters).to_numpy()
-Y = Hitters['Salary'].to_numpy()
+def summary_plot(results, ax, col='loss', valid_legend='Validation', training_legend='Training', ylabel='Loss', fontsize=20):
 
-(X_train, X_test, Y_train, Y_test) = train_test_split(X, Y, test_size=1/3, random_state=1)
+    for(column, color, label) in zip([f'train_{col}_epoch', f'valid_{col}'], ['black', 'red'], [training_legend, valid_legend]):
+        results.plot(x='epoch', y=column, label=label, marker='o',color=color, ax=ax)
 
-hit_lm = LinearRegression().fit(X_train, Y_train)
-Yhat_test = hit_lm.predict(X_test)
-mean_error = np.abs(Yhat_test - Y_test).mean()
-print(mean_error)
+    ax.set_xlabel('Epoch')
+    ax.set_ylabel(ylabel)
+    return ax
 
-scaler = StandardScaler(with_mean=True, with_std=True)
-lasso = Lasso(warm_start=True, max_iter=30_000)
-standard_lasso = Pipeline(steps=[('scaler', scaler), ('lasso', lasso)])
-
-X_s = scaler.fit_transform(X_train)
-n = X_s.shape[0]
-lam_max = np.fabs(X_s.T.dot(Y_train - Y_train.mean())).max() / n
-params_grid = { 'alpha' : np.exp(np.linspace(0, np.log(0.01), 100)) * lam_max}
-
-cv = KFold(10, shuffle=True, random_state=1)
-grid = GridSearchCV(lasso, params_grid, cv=cv, scoring='neg_mean_absolute_error')
-grid.fit(X_train, Y_train)
-# print(grid.best_estimator_)
-
-trained_lasso = grid.best_estimator_
-Yhat_test = trained_lasso.predict(X_test)
-mean_error = np.fabs(Yhat_test - Y_test).mean()
-print(mean_error)
-
-
+fix, ax = subplots(1, 1, figsize=(6,6))
+ax = summary_plot(hit_results, ax, col='mae', ylabel='MAE', valid_legend='Validation (=Test)')
+ax.set_ylim([0, 400])
+ax.set_xticks(np.linspace(0, 50, 11).astype(int))
+plt.show()
