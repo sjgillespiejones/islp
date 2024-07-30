@@ -21,6 +21,9 @@ from pytorch_lightning import Trainer
 from pytorch_lightning.loggers import CSVLogger
 
 from pytorch_lightning import seed_everything
+
+from utils.summaryPlot import summary_plot
+
 seed_everything(0, workers=True)
 torch.use_deterministic_algorithms(True, warn_only=True)
 
@@ -38,15 +41,6 @@ import matplotlib.pyplot as plt
 hit_logger = CSVLogger('logs', name='hitters')
 #print(hit_logger.experiment.metrics_file_path)
 hit_results = pd.read_csv('logs/hitters/version_4/metrics.csv')
-
-def summary_plot(results, ax, col='loss', valid_legend='Validation', training_legend='Training', ylabel='Loss', fontsize=20):
-
-    for(column, color, label) in zip([f'train_{col}_epoch', f'valid_{col}'], ['black', 'red'], [training_legend, valid_legend]):
-        results.plot(x='epoch', y=column, label=label, marker='o',color=color, ax=ax)
-
-    ax.set_xlabel('Epoch')
-    ax.set_ylabel(ylabel)
-    return ax
 
 fix, ax = subplots(1, 1, figsize=(6,6))
 ax = summary_plot(hit_results, ax, col='mae', ylabel='MAE', valid_legend='Validation (=Test)')
