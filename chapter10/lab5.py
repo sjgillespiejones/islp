@@ -114,10 +114,23 @@ def main():
     cifar_module = SimpleModule.classification(cifar_model, num_classes=100, optimizer=cifar_optimizer)
     cifar_logger = CSVLogger('logs', name='CIFAR100')
 
-    cifar_trainer = Trainer(deterministic=True, max_epochs=30, logger=cifar_logger, callbacks=[ErrorTracker()])
-    cifar_trainer.fit(cifar_module, datamodule=cifar_dm)
-    cifar_trainer.test(cifar_module,datamodule=cifar_dm)
+    # cifar_trainer = Trainer(deterministic=True, max_epochs=30, logger=cifar_logger, callbacks=[ErrorTracker()])
+    # cifar_trainer.fit(cifar_module, datamodule=cifar_dm)
+    # cifar_trainer.test(cifar_module,datamodule=cifar_dm)
     # [{'test_loss': 2.4235761165618896, 'test_accuracy': 0.42969998717308044}]
+
+    try:
+        for name, metric in cifar_module.metrics.items():
+            cifar_module.metrics[name] = metric.to('mps')
+            cifar_trainer_mps = Trainer(accelerator='mps', deterministic=True, max_epochs=30, logger=cifar_logger, callbacks=[ErrorTracker()])
+            cifar_trainer_mps.fit(cifar_module, datamodule=cifar_dm)
+            cifar_trainer_mps.test(cifar_module, datamodule=cifar_dm)
+            # test_accuracy
+            # 0.41929998993873596
+            # test_loss
+            # 2.458094596862793
+    except:
+        pass
 
 if __name__ == '__main__':
     main()

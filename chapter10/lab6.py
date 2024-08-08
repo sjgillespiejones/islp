@@ -4,7 +4,7 @@ from matplotlib.pyplot import subplots
 
 from utils.summaryPlot import summary_plot
 
-cifar_results = pd.read_csv('logs/CIFAR100/version_0/metrics.csv')
+cifar_results = pd.read_csv('logs/CIFAR100/version_1/metrics.csv')
 fig, ax = subplots(1, 1, figsize=(6, 6))
 summary_plot(cifar_results,
              ax,
