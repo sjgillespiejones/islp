@@ -2,3 +2,4 @@ chapter10/logs/*
 chapter10/data/*
 chapter10/book_images/*
 **/.DS_Store
+chapter10/lightning_logs/*
