@@ -39,4 +39,3 @@ probs = logit.predict(x_test)
 table = confusion_table(probs, y_test)
 print(table)
 print(error_rate(table))
-
